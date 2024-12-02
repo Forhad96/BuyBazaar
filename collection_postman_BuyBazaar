@@ -1,0 +1,225 @@
+{
+    "info": {
+        "_postman_id": "090f463d-12e9-413f-b019-57b65cce8fd3",
+        "name": "BuyBazaar",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": ""
+    },
+    "item": [
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "Create Admin",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/users",
+                            "path": [
+                                "users"
+                            ],
+                            "host": [
+                                "{{base_url}}"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcm96MTIzNDVAcGguY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzMxNzQ1MDAwLCJleHAiOjE3MzIxNzcwMDB9.xIWsEA0k-L5Ge0in3pLEqUx13V0R-Qo2h_Ru6A8N4r4"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"password\": \"123456\",\n  \"admin\": {\n    \"name\": \"Firoz\",\n    \"email\": \"firoz123456@ph.com\",\n    \"contactNumber\": \"0123456787\"\n  }\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "path": [
+                                "auth",
+                                "login"
+                            ],
+                            "host": [
+                                "{{base_url}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"email\": \"firoz12345@ph.com\",\n  \"password\": \"654321\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/auth/refresh-token",
+                            "path": [
+                                "auth",
+                                "refresh-token"
+                            ],
+                            "host": [
+                                "{{base_url}}"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Cookie",
+                                "value": ""
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/auth/change-password",
+                            "path": [
+                                "auth",
+                                "change-password"
+                            ],
+                            "host": [
+                                "{{base_url}}"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Cookie",
+                                "value": ""
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "{{admin_Token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"oldPassword\":\"123456\",\n  \"newPassword\":\"654321\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "Get All Data",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/admin",
+                            "query": [
+                                {
+                                    "key": "searchTerm",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "contactNumber",
+                                    "value": "",
+                                    "disabled": true
+                                }
+                            ],
+                            "variable": [],
+                            "path": [
+                                "admin"
+                            ],
+                            "host": [
+                                "{{base_url}}"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZpcm96MTIzNDVAcGguY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzMxNzU0ODE3LCJleHAiOjE3MzE3NTU3MTd9.VDr5UATmwX_Og56W9DSkPTCO28Hdff0n4Wzd4z3hDAw"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Get Data By Id",
+                    "request": {
+                        "method": "GET"
+                    }
+                },
+                {
+                    "name": "Update Data",
+                    "request": {
+                        "method": "GET"
+                    }
+                },
+                {
+                    "name": "Delete Data",
+                    "request": {
+                        "method": "GET"
+                    }
+                },
+                {
+                    "name": "Soft Delete ",
+                    "request": {
+                        "method": "GET"
+                    }
+                }
+            ]
+        }
+    ]
+}
