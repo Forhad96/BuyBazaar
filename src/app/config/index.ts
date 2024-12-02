@@ -15,5 +15,10 @@ export const config = {
     reset_pass_token_secret: process.env.RESET_PASS_TOKEN_SECRET,
     reset_pass_token_expires_in: process.env.RESET_PASS_TOKEN_EXPIRES_IN,
   },
+  cloudinaryConfig: {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  },
   reset_pass_link: process.env.RESET_PASS_LINK,
 };

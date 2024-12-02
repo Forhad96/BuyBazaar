@@ -1,39 +1,40 @@
 import multer from "multer";
 import path from "path";
-import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
-import { ICloudinaryResponse, IFile } from "../app/interfaces/file";
-// Configuration
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import fs from "fs/promises"; // Use promises-based fs for modern asynchronous patterns
+import { IFile } from "../app/interfaces/file";
+import { config } from "../app/config";
+
+// Cloudinary Configuration
 cloudinary.config({
-  cloud_name: "dzubr705q",
-  api_key: "957641958718868",
-  api_secret: "rcfbqPZdr1ROM2QzP3y8Yl6TdiE", // Click 'View API Keys' above to copy your API secret
+  cloud_name: config.cloudinaryConfig.cloud_name,
+  api_key: config.cloudinaryConfig.api_key,
+  api_secret: config.cloudinaryConfig.api_secret,
 });
 
+// Multer Storage Configuration
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(process.cwd(), "/uploads"));
+  destination: (req, file, cb) => {
+    cb(null, path.resolve("uploads")); // Use resolve for consistent path handling
   },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Add timestamp for unique file naming
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-const uploadToCloudinary = async (file: IFile): Promise<ICloudinaryResponse | undefined> => {
-    return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload(file.path,
-            (error: Error, result: ICloudinaryResponse) => {
-                fs.unlinkSync(file.path)
-                if (error) {
-                    reject(error)
-                }
-                else {
-                    resolve(result)
-                }
-            })
-    })
+// Upload to Cloudinary
+const uploadToCloudinary = async (file: IFile): Promise<UploadApiResponse> => {
+  try {
+    const result = await cloudinary.uploader.upload(file.path);
+    await fs.unlink(file.path); // Asynchronously remove the file after upload
+    return result;
+  } catch (error) {
+    console.error("Error uploading file to Cloudinary:", error);
+    throw new Error("File upload failed. Please try again.");
+  }
 };
 
+// Export File Uploader Module
 export const fileUploader = { upload, uploadToCloudinary };
