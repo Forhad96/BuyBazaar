@@ -16,8 +16,8 @@ datasource db {
 model User {
   id                 String     @id @default(uuid())
   name               String
-  username           String?     @unique @default(uuid())
-  profilePhoto       String? @default("")
+  username           String?    @unique @default(uuid())
+  profilePhoto       String?    @default("")
   email              String     @unique
   password           String
   role               UserRole   @default(Customer)
@@ -26,10 +26,26 @@ model User {
   lastLogin          DateTime?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
+  vendor             Vendor?    @relation("vendorOwner")
 
   @@map("users")
 }
 
+model Vendor {
+  id             String   @id @default(uuid())
+  ownerId        String   @unique
+  owner          User     @relation("vendorOwner", fields: [ownerId], references: [id])
+  shopName       String   @unique 
+  shopLogo       String
+  description    String
+  followersCount Int @default(0)
+  isBlacklisted  Boolean @default(false)
+  contactNumber  String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("vendors")
+}
 
 enum UserRole {
   SuperAdmin
