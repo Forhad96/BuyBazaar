@@ -1,8 +1,73 @@
-import { UserRole, UserStatus } from "@prisma/client";
+import { Prisma, UserRole, UserStatus } from "@prisma/client";
 import { fileUploader } from "../../../helpers/fileUploader";
 import prisma from "../../../shared/prisma";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import { paginationHelper } from "../../../helpers/paginationHelper";
+import { vendorSearchAbleFields } from "./vendor.constant";
 
+const getAllVendors = async (params: any, options: IPaginationOptions) => {
+  console.log(options);
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
 
+  const andConditions: Prisma.VendorWhereInput[] = [];
+
+  //console.log(filterData);
+  if (params.searchTerm) {
+    andConditions.push({
+      OR: vendorSearchAbleFields.map((field) => ({
+        [field]: {
+          contains: params.searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+
+  // andConditions.push({
+  //   isDeleted: false,
+  // });
+
+  //console.dir(andConditions, { depth: 'infinity' })
+  const whereConditions: Prisma.VendorWhereInput = { AND: andConditions };
+
+  const result = await prisma.vendor.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const total = await prisma.vendor.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 const createVendor = async (req: any) => {
   const { file, body } = req;
   let shopLogoUrl: string | null = null;
@@ -10,7 +75,7 @@ const createVendor = async (req: any) => {
   // Get user information
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
-      email: req.user?.email,
+      id: body.ownerId,
       status: UserStatus.Active,
     },
   });
@@ -45,4 +110,6 @@ const createVendor = async (req: any) => {
 
 export const vendorService = {
   createVendor,
+
+  getAllVendors,
 };

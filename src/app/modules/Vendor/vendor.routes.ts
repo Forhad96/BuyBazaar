@@ -5,6 +5,8 @@ import { fileUploader } from "../../../helpers/fileUploader";
 
 const router = Router();
 
+
+router.get("/", VendorController.getAllVendors);
 router.post(
   "/create-vendor",
   fileUploader.upload.single("file"),

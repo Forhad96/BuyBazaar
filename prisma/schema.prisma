@@ -32,19 +32,49 @@ model User {
 }
 
 model Vendor {
-  id             String   @id @default(uuid())
-  ownerId        String   @unique
-  owner          User     @relation("vendorOwner", fields: [ownerId], references: [id])
-  shopName       String   @unique 
+  id             String    @id @default(uuid())
+  ownerId        String    @unique
+  owner          User      @relation("vendorOwner", fields: [ownerId], references: [id])
+  shopName       String    @unique
   shopLogo       String
   description    String
-  followersCount Int @default(0)
-  isBlacklisted  Boolean @default(false)
+  followersCount Int       @default(0)
+  isBlacklisted  Boolean   @default(false)
   contactNumber  String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  product        Product[]
 
   @@map("vendors")
+}
+
+model Product {
+  id                 String   @id @default(uuid())
+  vendorId           String
+  vendor             Vendor   @relation(fields: [vendorId], references: [id])
+  categoryId         String
+  category           Category @relation(fields: [categoryId], references: [id])
+  name               String
+  description        String
+  price              Decimal
+  discountPercentage Float
+  isFlashSale        Boolean
+  inventoryCount     Int
+  isAvailable        Boolean
+  flashSalePrice     Decimal?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String @unique
+  description String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   Product[]
 }
 
 enum UserRole {
