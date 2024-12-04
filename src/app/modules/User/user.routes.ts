@@ -22,6 +22,13 @@ const parseFormData = (
 // router.get("/me", auth(UserRole.SuperAdmin,UserRole.Admin,UserRole.Vendor,UserRole.Customer) ,userController.getMyProfile);
 
 router.post(
+  "/create-admin",
+  auth(UserRole.SUPERADMIN),
+  validateRequest(UserValidationSchemas.createAdminSchema),
+  userController.createAdmin
+);
+
+router.post(
   "/create-customer",
   fileUploader.upload.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {

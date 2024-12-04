@@ -70,10 +70,20 @@ const createVendorSchema = z.object({
     shopName: z.string().min(3, "Shop name must be at least 3 characters long"),
   })
   })
+const createAdminSchema = z.object({
+  body:z.object({
+    name: z.string().min(1, "Name must be at least 3 characters long"),
+    email: z.string().email(),
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+    role: z.nativeEnum(UserRole).default(UserRole.ADMIN),
+
+  })
+  })
   
 
 export const UserValidationSchemas = {
   createUserSchema,
   createCustomerSchema,
   createVendorSchema,
+  createAdminSchema
 };

@@ -7,6 +7,14 @@ import { userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { IFile } from "../../interfaces/file";
+const createAdmin = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.createAdmin(req.body);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Admin created successfully",
+    data: result,
+  });
+})
 const createCustomer = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createCustomer(
     req?.file?.path as string,
@@ -79,6 +87,7 @@ const createVendor = catchAsync(async (req: Request, res: Response) => {
 //   })
 // });
 export const userController = {
+  createAdmin,
   createCustomer,
   createVendor,
 };

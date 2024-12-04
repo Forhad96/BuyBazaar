@@ -76,6 +76,27 @@ const createVendor = async (payload: any) => {
 
   return result;
 };
+
+const createAdmin = async (payload: any) => {
+  if (payload.role !== UserRole.ADMIN) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Role must be ADMIN");
+  }
+
+  payload.password =
+    (payload.password as string) && (await bcrypt.hash(payload.password, 12));
+
+  const result = await prisma.user.create({
+    data: {
+      name: payload.name,    
+      email: payload.email,
+      role: payload.role,
+      password: payload.password,
+    },
+  });
+
+  return result;
+};
+
 // const getAllFromDB = async (params: any, options: IPaginationOptions) => {
 //   const { page, limit, skip } = paginationHelper.calculatePagination(options);
 //   const { searchTerm, ...filterData } = params;
@@ -247,6 +268,7 @@ const createVendor = async (payload: any) => {
 export const userServices = {
   createCustomer,
   createVendor,
+  createAdmin
   // getAllFromDB,
   // changeProfileStatus,
   // getMyProfile,
