@@ -19,6 +19,64 @@ import { generateHashedPassword } from "../../../helpers/bcryptHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
+
+const getAllUser = async (params: any, options: IPaginationOptions) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+// console.log({searchTerm},{filterData});
+  const andConditions: Prisma.UserWhereInput[] = [];
+
+  if (params.searchTerm) {
+    andConditions.push({
+      OR: userSearchAbleFields.map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.UserWhereInput = {
+    AND: andConditions,
+  };
+
+  const result = await prisma.user.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    include: {
+      customer: true,
+      vendor: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const total = await prisma.user.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 const getMyProfile = async (user: IAuthUser) => {
   if (user === null) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "User is null");
@@ -282,9 +340,9 @@ export const userServices = {
   createCustomer,
   createVendor,
   createAdmin,
-  // getAllFromDB,
-  // changeProfileStatus,
+  getAllUser,
   getMyProfile,
+  // changeProfileStatus,
   // updateMyProfile
 };
 

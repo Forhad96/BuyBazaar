@@ -8,6 +8,19 @@ import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { IFile } from "../../interfaces/file";
 
+const getAllUser = catchAsync(async (req: Request, res: Response) => {
+  const filterData = pick(req.query, userSearchAbleFields);
+  const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  const result = await userServices.getAllUser(filterData, options);  
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Users retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  })
+});
+
 const getMyProfile = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const user = req.user;
@@ -102,6 +115,7 @@ const createVendor = catchAsync(async (req: Request, res: Response) => {
 //   })
 // });
 export const userController = {
+  getAllUser,
   getMyProfile,
   createAdmin,
   createCustomer,

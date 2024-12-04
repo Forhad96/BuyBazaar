@@ -18,8 +18,16 @@ const parseFormData = (
   next();
 };
 
-// router.get("/", auth(UserRole.SuperAdmin,UserRole.Admin) ,userController.getAllFromDB);
-router.get("/me", auth(UserRole.SUPERADMIN,UserRole.ADMIN,UserRole.VENDOR,UserRole.CUSTOMER) ,userController.getMyProfile);
+router.get(
+  "/",
+  auth(UserRole.SUPERADMIN, UserRole.ADMIN),
+  userController.getAllUser
+);
+router.get(
+  "/me",
+  auth(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.VENDOR, UserRole.CUSTOMER),
+  userController.getMyProfile
+);
 
 // create admin
 router.post(
@@ -47,6 +55,10 @@ router.post(
 );
 
 //create vendor
-router.post("/create-vendor",validateRequest(UserValidationSchemas.createVendorSchema),userController.createVendor);
+router.post(
+  "/create-vendor",
+  validateRequest(UserValidationSchemas.createVendorSchema),
+  userController.createVendor
+);
 
 export const UserRoutes = router;
