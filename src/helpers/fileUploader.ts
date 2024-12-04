@@ -25,10 +25,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Upload to Cloudinary
-const uploadToCloudinary = async (file: IFile): Promise<UploadApiResponse> => {
+const uploadToCloudinary = async (filePath: string): Promise<UploadApiResponse> => {
   try {
-    const result = await cloudinary.uploader.upload(file.path);
-    await fs.unlink(file.path); // Asynchronously remove the file after upload
+    const result = await cloudinary.uploader.upload(filePath);
+    await fs.unlink(filePath); // Asynchronously remove the file after upload
     return result;
   } catch (error) {
     console.error("Error uploading file to Cloudinary:", error);
@@ -36,5 +36,14 @@ const uploadToCloudinary = async (file: IFile): Promise<UploadApiResponse> => {
   }
 };
 
+// Destroy an image on Cloudinary
+const destroyOnCloudinary = async (publicId: string): Promise<void> => {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error("Error destroying image on Cloudinary:", error);
+  }
+};
+
 // Export File Uploader Module
-export const fileUploader = { upload, uploadToCloudinary };
+export const fileUploader = { upload, uploadToCloudinary, destroyOnCloudinary };

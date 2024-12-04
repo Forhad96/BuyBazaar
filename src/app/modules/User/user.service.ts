@@ -1,4 +1,12 @@
-import { Prisma, PrismaClient, UserRole, UserStatus } from "@prisma/client";
+import {
+  Customer,
+  Prisma,
+  PrismaClient,
+  User,
+  UserRole,
+  UserStatus,
+  Vendor,
+} from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { fileUploader } from "../../../helpers/fileUploader";
 import { IFile } from "../../interfaces/file";
@@ -7,32 +15,35 @@ import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { userSearchAbleFields } from "./user.constant";
 import { IAuthUser } from "../../interfaces/common";
+import { generateHashedPassword } from "../../../helpers/bcryptHelper";
+import prisma from "../../../shared/prisma";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
+const createCustomer = async (filePath: string, payload: User) => {
+  if (filePath) {
+    const uploadedFile = await fileUploader.uploadToCloudinary(filePath);
+    payload.profilePicture = uploadedFile?.secure_url || null;
+    payload.password =
+      (payload.password as string) && (await bcrypt.hash(payload.password, 12));
 
-const prisma = new PrismaClient();
+    const result = await prisma.user.create({
+      data: {
+        ...payload,
+        customer: {
+          create: {},
+        },
+      },
+    });
 
-const createUser = async (req: Request) => {
-  const { file, body } = req;
-  let profilePhotoUrl: string | null = null;
-
-  // Handle file upload if a file is provided
-  if (file) {
-    const uploadedFile = await fileUploader.uploadToCloudinary(file);
-    profilePhotoUrl = uploadedFile?.secure_url || null;
+    if (!result) {
+      fileUploader.destroyOnCloudinary(uploadedFile.public_id);
+      throw new ApiError(
+        httpStatus.EXPECTATION_FAILED,
+        "Failed to create customer"
+      );
+    }
+    return result;
   }
-
-  // Hash the password
-  const hashedPassword = await bcrypt.hash(body.password, 12);
-
-  // Construct user data
-  const userData = {
-    ...body,
-    password: hashedPassword,
-    profilePhoto: profilePhotoUrl,
-  };
-
-  // Save the user to the database
-  const result = await prisma.user.create({ data: userData });
-  return result;
 };
 
 // const getAllFromDB = async (params: any, options: IPaginationOptions) => {
@@ -204,10 +215,68 @@ const createUser = async (req: Request) => {
 // }
 
 export const userServices = {
-  createUser,
+  createCustomer,
 
   // getAllFromDB,
   // changeProfileStatus,
   // getMyProfile,
   // updateMyProfile
 };
+
+// {
+//   type TPayload = {
+//     user: Prisma.UserCreateInput;
+//     vendor?: Prisma.VendorCreateInput;
+//     customer?: Prisma.CustomerCreateInput;
+//   };
+
+//   const registerUser = async (filePath: string, payload: TPayload) => {
+//     let profilePhotoUrl: string | null = null;
+//   console.log(payload);
+//     // Handle file upload if a file is provided
+//     if (filePath) {
+//       const uploadedFile = await fileUploader.uploadToCloudinary(filePath);
+//       profilePhotoUrl = uploadedFile?.secure_url || null;
+//       console.log(uploadedFile);
+//     }
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(payload?.user?.password, 12);
+
+//     let result = prisma.$transaction(async (transactionClient) => {
+//       // Save the user to the database
+//       if (payload && payload.user.role === UserRole.CUSTOMER) {
+//         const customer = await transactionClient.user.create({
+//           data: {
+//             name: payload.user.name,
+//             password: hashedPassword,
+//             profilePicture: profilePhotoUrl,
+//             email: payload.user.email,
+//             role: payload.user.role,
+//             customer: {
+//               create: {...payload.customer},
+//             },
+//           },
+//         });
+//         return customer;
+//       } else if (payload && payload.user.role === UserRole.VENDOR) {
+//         const vendor = await prisma.user.create({
+//           data: {
+//             password: hashedPassword,
+//             profilePicture: profilePhotoUrl,
+//             name: payload.user.name,
+//             email: payload.user.email,
+//             role: payload.user.role,
+//             customer: {
+//               create: {...payload.vendor},
+//             },
+//           },
+//         });
+//         return vendor;
+//       }
+//     });
+
+//     return result;
+//   };
+
+// }

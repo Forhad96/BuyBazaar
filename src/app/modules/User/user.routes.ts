@@ -26,7 +26,7 @@ router.post(
   fileUploader.upload.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const parsedData = UserValidationSchemas.createUserSchema.parse(
+      const parsedData = UserValidationSchemas.createCustomerSchema.parse(
         JSON.parse(req.body.data)
       );
       req.body = parsedData;
@@ -37,6 +37,6 @@ router.post(
   }
 );
 
-router.post("/create-customer");
+// router.post("/create-customer");
 
 export const UserRoutes = router;

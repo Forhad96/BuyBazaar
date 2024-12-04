@@ -6,8 +6,14 @@ import pick from "../../../shared/pick";
 import { userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
+import { IFile } from "../../interfaces/file";
 const createUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await userServices.createUser(req);
+  console.log(req.file?.path);
+
+  const result = await userServices.createCustomer(
+    req?.file?.path as string,
+    req.body
+  );
   res.status(httpStatus.OK).json({
     success: true,
     message: "User created successfully",
@@ -66,6 +72,5 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 //   })
 // });
 export const userController = {
-   createUser,
-
+  createUser,
 };
