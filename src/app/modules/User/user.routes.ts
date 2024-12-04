@@ -19,8 +19,9 @@ const parseFormData = (
 };
 
 // router.get("/", auth(UserRole.SuperAdmin,UserRole.Admin) ,userController.getAllFromDB);
-// router.get("/me", auth(UserRole.SuperAdmin,UserRole.Admin,UserRole.Vendor,UserRole.Customer) ,userController.getMyProfile);
+router.get("/me", auth(UserRole.SUPERADMIN,UserRole.ADMIN,UserRole.VENDOR,UserRole.CUSTOMER) ,userController.getMyProfile);
 
+// create admin
 router.post(
   "/create-admin",
   auth(UserRole.SUPERADMIN),
@@ -28,6 +29,7 @@ router.post(
   userController.createAdmin
 );
 
+//create customer
 router.post(
   "/create-customer",
   fileUploader.upload.single("file"),
@@ -44,6 +46,7 @@ router.post(
   }
 );
 
+//create vendor
 router.post("/create-vendor",validateRequest(UserValidationSchemas.createVendorSchema),userController.createVendor);
 
 export const UserRoutes = router;

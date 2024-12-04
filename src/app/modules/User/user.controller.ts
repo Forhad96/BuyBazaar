@@ -7,35 +7,50 @@ import { userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { IFile } from "../../interfaces/file";
+
+const getMyProfile = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await userServices.getMyProfile(user as IAuthUser);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User profile retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createAdmin(req.body);
-  res.status(httpStatus.OK).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
     message: "Admin created successfully",
     data: result,
   });
-})
+});
 const createCustomer = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createCustomer(
     req?.file?.path as string,
     req.body
   );
-  res.status(httpStatus.OK).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
-    message: "User created successfully",
+    message: "Customer created successfully",
     data: result,
   });
 });
 const createVendor = catchAsync(async (req: Request, res: Response) => {
-  const result = await userServices.createVendor(
-    req.body
-  );
-  res.status(httpStatus.OK).json({
+  const result = await userServices.createVendor(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
     message: "Vendor created successfully",
     data: result,
   });
-})
+});
 // const getAllFromDB = catchAsync(async (req, res) => {
 //   const filterData = pick(req.query, userSearchAbleFields);
 //   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
@@ -87,6 +102,7 @@ const createVendor = catchAsync(async (req: Request, res: Response) => {
 //   })
 // });
 export const userController = {
+  getMyProfile,
   createAdmin,
   createCustomer,
   createVendor,

@@ -19,6 +19,21 @@ import { generateHashedPassword } from "../../../helpers/bcryptHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
+const getMyProfile = async (user: IAuthUser) => {
+  if (user === null) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "User is null");
+  }
+  const result = await prisma.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    include: {
+      customer: true,
+      vendor: true,
+    },
+  });
+  return result;
+};
 const createCustomer = async (filePath: string, payload: User) => {
   if (payload.role !== UserRole.VENDOR) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Role must be customer");
@@ -31,25 +46,23 @@ const createCustomer = async (filePath: string, payload: User) => {
   payload.password =
     (payload.password as string) && (await bcrypt.hash(payload.password, 12));
 
-
-    const result = await prisma.user.create({
-      data: {
-        ...payload,
-        customer: {
-          create: {},
-        },
+  const result = await prisma.user.create({
+    data: {
+      ...payload,
+      customer: {
+        create: {},
       },
-    });
+    },
+  });
 
-    if (!result && uploadedFile) {
-      fileUploader.destroyOnCloudinary(uploadedFile.public_id);
-      throw new ApiError(
-        httpStatus.EXPECTATION_FAILED,
-        "Failed to create customer"
-      );
-    }
-    return result;
-
+  if (!result && uploadedFile) {
+    fileUploader.destroyOnCloudinary(uploadedFile.public_id);
+    throw new ApiError(
+      httpStatus.EXPECTATION_FAILED,
+      "Failed to create customer"
+    );
+  }
+  return result;
 };
 
 const createVendor = async (payload: any) => {
@@ -87,7 +100,7 @@ const createAdmin = async (payload: any) => {
 
   const result = await prisma.user.create({
     data: {
-      name: payload.name,    
+      name: payload.name,
       email: payload.email,
       role: payload.role,
       password: payload.password,
@@ -268,10 +281,10 @@ const createAdmin = async (payload: any) => {
 export const userServices = {
   createCustomer,
   createVendor,
-  createAdmin
+  createAdmin,
   // getAllFromDB,
   // changeProfileStatus,
-  // getMyProfile,
+  getMyProfile,
   // updateMyProfile
 };
 
