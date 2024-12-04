@@ -13,3 +13,4 @@ export const generateHashedPassword = async (
     console.error("Error hashing password:", err);
   }
 };
+
