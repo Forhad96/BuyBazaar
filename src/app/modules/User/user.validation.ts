@@ -52,7 +52,28 @@ const createCustomerSchema = z.object({
   updatedAt: z.date().default(new Date()),
 });
 
+const VendorSchema = z.object({
+  userId: z.string().uuid().optional(),
+  shopName: z.string(),
+  shopLogo: z.string().url().optional(),
+  description: z.string().optional(),
+  isBlacklisted: z.boolean().default(false),
+  createdAt: z.date().default(new Date()),
+  updatedAt: z.date().default(new Date()),
+});
+const createVendorSchema = z.object({
+  body:z.object({
+    name: z.string().min(1, "Name must be at least 3 characters long"),
+    email: z.string().email(),
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+    role: z.nativeEnum(UserRole).default(UserRole.VENDOR),
+    shopName: z.string().min(3, "Shop name must be at least 3 characters long"),
+  })
+  })
+  
+
 export const UserValidationSchemas = {
   createUserSchema,
-  createCustomerSchema
+  createCustomerSchema,
+  createVendorSchema,
 };

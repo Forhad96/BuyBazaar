@@ -7,9 +7,7 @@ import { userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 import { IFile } from "../../interfaces/file";
-const createUser = catchAsync(async (req: Request, res: Response) => {
-  console.log(req.file?.path);
-
+const createCustomer = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createCustomer(
     req?.file?.path as string,
     req.body
@@ -20,7 +18,16 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
+const createVendor = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.createVendor(
+    req.body
+  );
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Vendor created successfully",
+    data: result,
+  });
+})
 // const getAllFromDB = catchAsync(async (req, res) => {
 //   const filterData = pick(req.query, userSearchAbleFields);
 //   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
@@ -72,5 +79,6 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 //   })
 // });
 export const userController = {
-  createUser,
+  createCustomer,
+  createVendor,
 };

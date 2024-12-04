@@ -20,11 +20,17 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
 const createCustomer = async (filePath: string, payload: User) => {
+  if (payload.role !== UserRole.VENDOR) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Role must be customer");
+  }
+  let uploadedFile = null;
   if (filePath) {
-    const uploadedFile = await fileUploader.uploadToCloudinary(filePath);
+    uploadedFile = await fileUploader.uploadToCloudinary(filePath);
     payload.profilePicture = uploadedFile?.secure_url || null;
-    payload.password =
-      (payload.password as string) && (await bcrypt.hash(payload.password, 12));
+  }
+  payload.password =
+    (payload.password as string) && (await bcrypt.hash(payload.password, 12));
+
 
     const result = await prisma.user.create({
       data: {
@@ -35,7 +41,7 @@ const createCustomer = async (filePath: string, payload: User) => {
       },
     });
 
-    if (!result) {
+    if (!result && uploadedFile) {
       fileUploader.destroyOnCloudinary(uploadedFile.public_id);
       throw new ApiError(
         httpStatus.EXPECTATION_FAILED,
@@ -43,9 +49,33 @@ const createCustomer = async (filePath: string, payload: User) => {
       );
     }
     return result;
-  }
+
 };
 
+const createVendor = async (payload: any) => {
+  if (payload.role !== UserRole.VENDOR) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Role must be VENDOR");
+  }
+
+  payload.password =
+    (payload.password as string) && (await bcrypt.hash(payload.password, 12));
+
+  const result = await prisma.user.create({
+    data: {
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+      password: payload.password,
+      vendor: {
+        create: {
+          shopName: payload.shopName,
+        },
+      },
+    },
+  });
+
+  return result;
+};
 // const getAllFromDB = async (params: any, options: IPaginationOptions) => {
 //   const { page, limit, skip } = paginationHelper.calculatePagination(options);
 //   const { searchTerm, ...filterData } = params;
@@ -216,7 +246,7 @@ const createCustomer = async (filePath: string, payload: User) => {
 
 export const userServices = {
   createCustomer,
-
+  createVendor,
   // getAllFromDB,
   // changeProfileStatus,
   // getMyProfile,

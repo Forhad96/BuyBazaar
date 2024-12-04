@@ -30,13 +30,13 @@ router.post(
         JSON.parse(req.body.data)
       );
       req.body = parsedData;
-      await userController.createUser(req, res, next);
+      await userController.createCustomer(req, res, next);
     } catch (error) {
       next(error); // Passes validation errors to the error handler middleware
     }
   }
 );
 
-// router.post("/create-customer");
+router.post("/create-vendor",validateRequest(UserValidationSchemas.createVendorSchema),userController.createVendor);
 
 export const UserRoutes = router;
