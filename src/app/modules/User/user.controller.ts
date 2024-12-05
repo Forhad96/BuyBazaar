@@ -11,14 +11,14 @@ import { IFile } from "../../interfaces/file";
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
   const filterData = pick(req.query, userSearchAbleFields);
   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
-  const result = await userServices.getAllUser(filterData, options);  
+  const result = await userServices.getAllUser(filterData, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Users retrieved successfully",
     meta: result.meta,
     data: result.data,
-  })
+  });
 });
 
 const getMyProfile = catchAsync(
@@ -64,60 +64,43 @@ const createVendor = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-// const getAllFromDB = catchAsync(async (req, res) => {
-//   const filterData = pick(req.query, userSearchAbleFields);
-//   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
-//   const result = await userServices.getAllFromDB(filterData, options);
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: "Admin data retrieves successfully",
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
-// const changeProfileStatus = catchAsync(async (req, res) => {
-//   const { id } = req.params;
-//   const result = await userServices.changeProfileStatus(id, req.body);
+const changeProfileStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await userServices.changeProfileStatus(id, req.body);
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: "Profile status update successfully",
-//     data: result,
-//   });
-// });
-// const getMyProfile = catchAsync(
-//   async (req: Request & { user?: IAuthUser }, res: Response) => {
-//     const user = req.user;
-//     const result = await userServices.getMyProfile(user as IAuthUser);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile status update successfully",
+    data: result,
+  });
+});
 
-//     sendResponse(res, {
-//       statusCode: 200,
-//       success: true,
-//       message: "My Profile data faced  successfully",
-//       data: result,
-//     });
-//   }
-// );
-// const updateMyProfile = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+const updateMyProfile = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user;
+    const filePath = req?.file?.path as string;
+    const result = await userServices.updateMyProfile(
+      user as IAuthUser,
+      filePath,
+      req.body
+    );
 
-//   const user = req.user;
-
-//   const result = await userServices.updateMyProfile(user as IAuthUser, req);
-
-//   sendResponse(res, {
-//       statusCode: httpStatus.OK,
-//       success: true,
-//       message: "My profile updated!",
-//       data: result
-//   })
-// });
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "My profile updated!",
+      data: result,
+    });
+  }
+);
 export const userController = {
   getAllUser,
   getMyProfile,
   createAdmin,
   createCustomer,
   createVendor,
+  changeProfileStatus,
+  updateMyProfile,
 };

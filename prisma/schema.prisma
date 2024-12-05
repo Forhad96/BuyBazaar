@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // Enums
 enum UserRole {
   SUPERADMIN
@@ -63,315 +62,313 @@ enum PasswordResetStatus {
 
 // Password Reset Token Model
 model PasswordResetToken {
-  id            String    @id @default(cuid())
-  userId        String
-  token         String    @unique
-  status        PasswordResetStatus @default(PENDING)
-  createdAt     DateTime  @default(now())
-  expiresAt     DateTime
+  id        String              @id @default(cuid())
+  userId    String
+  token     String              @unique
+  status    PasswordResetStatus @default(PENDING)
+  createdAt DateTime            @default(now())
+  expiresAt DateTime
 }
 
 // User Model
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
+  id              String            @id @default(cuid())
+  email           String            @unique
+  password        String
   passwordHistory PasswordHistory[]
-  
+
   // Security Fields
-  needsPasswordChange Boolean @default(true)
-  lastPasswordChange DateTime @default(now())
-  passwordAttempts   Int      @default(0)
-  isLocked           Boolean  @default(false)
-  lockoutEnd         DateTime?
-  
+  needsPasswordChange Boolean   @default(true)
+  lastPasswordChange  DateTime  @default(now())
+  passwordAttempts    Int       @default(0)
+  isLocked            Boolean   @default(false)
+  lockoutEnd          DateTime?
+
   // Basic User Fields
-  role          UserRole
-  name          String
+  role           UserRole
+  name           String
   profilePicture String?
-  
+  phoneNumber    String?
+
+  // Address Fields
+  address String?
+  city    String?
+  state   String?
+  zipCode String?
+  country String?
+
   // Account Management
-  status        UserStatus  @default(ACTIVE)
+  status           UserStatus @default(ACTIVE)
   suspensionReason String?
-  suspendedAt    DateTime?
-  deletedAt      DateTime?
-  lastLogin      DateTime?
-  
+  suspendedAt      DateTime?
+  deletedAt        DateTime?
+  lastLogin        DateTime?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  vendor        Vendor?
-  customer      Customer?
-  orders        Order[]
-  reviews       Review[]
-  loginHistory  UserLoginHistory[]
+  vendor            Vendor?
+  orders            Order[]
+  reviews           Review[]
+  loginHistory      UserLoginHistory[]
   suspensionHistory SuspensionRecord[]
+  Follow            Follow[]
+  RecentView        RecentView[]
 
   @@map("users")
 }
 
 // Password History Model
 model PasswordHistory {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   hashedPassword String
-  createdAt     DateTime  @default(now())
+  createdAt      DateTime @default(now())
+
   @@map("passwordHistory")
 }
 
 // Vendor Model
 model Vendor {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   shopName      String
   shopLogo      String?
   description   String?
-  isBlacklisted Boolean   @default(false)
-  
-  products      Product[]
-  followers     Follow[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isBlacklisted Boolean @default(false)
+
+  products  Product[]
+  followers Follow[]
+
+  //timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("vendors")
-}
-
-// Customer Model
-model Customer {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  
-  phoneNumber   String?
-  address       String?
-  city          String?
-  state         String?
-  zipCode       String?
-  country       String?
-
-  recentViews   RecentView[]
-  followedShops Follow[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  @@map("customers")
-
 }
 
 // Flash Sale Model
 model FlashSale {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  
-  startTime     DateTime
-  endTime       DateTime
-  
-  status        FlashSaleStatus @default(SCHEDULED)
-  
-  products      FlashSaleProduct[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  startTime DateTime
+  endTime   DateTime
+
+  status FlashSaleStatus @default(SCHEDULED)
+
+  products FlashSaleProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("flashSales")
 }
 
 // Flash Sale Product Relationship
 model FlashSaleProduct {
-  id            String    @id @default(cuid())
-  flashSaleId   String
-  flashSale     FlashSale @relation(fields: [flashSaleId], references: [id])
-  
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id])
-  
-  specialPrice  Float
-  discountPercentage Float
-  stockLimit    Int
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  flashSaleId String
+  flashSale   FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
 
- //add @map name here
- @@map("flashSaleProducts")
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  specialPrice       Float
+  discountPercentage Float
+  stockLimit         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //add @map name here
+  @@map("flashSaleProducts")
 }
 
 // Product Model
 model Product {
-  id            String    @id @default(cuid())
-  vendorId      String
-  vendor        Vendor    @relation(fields: [vendorId], references: [id])
-  
-  name          String
-  description   String
-  price         Float
-  category      Category  @relation(fields: [categoryId], references: [id])
-  categoryId    String
-  
-  type          ProductType
-  
-  inventory     Int
-  images        String[]
-  discount      Float?
-  
+  id       String @id @default(cuid())
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String
+  price       Float
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId  String
+
+  type ProductType
+
+  inventory Int
+  images    String[]
+  discount  Float?
+
   // Polymorphic relations
-  clothingDetails   ClothingProduct?
+  clothingDetails    ClothingProduct?
   electronicsDetails ElectronicsProduct?
-  
+
   // Flash Sale Relationship
   flashSaleProducts FlashSaleProduct[]
-  
-  reviews       Review[]
-  orderItems    OrderItem[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("products")
 }
 
 // Product Type Models
 model ClothingProduct {
-  id            String   @id @default(cuid())
-  productId     String   @unique
-  product       Product  @relation(fields: [productId], references: [id])
-  
-  size          String
-  color         String
-  material      String
-  brand         String
-  gender        String?
+  id        String  @id @default(cuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id])
+
+  size     String
+  color    String
+  material String
+  brand    String
+  gender   String?
+
   @@map("clothingProduct")
 }
 
 model ElectronicsProduct {
-  id            String   @id @default(cuid())
-  productId     String   @unique
-  product       Product  @relation(fields: [productId], references: [id])
-  
-  brand         String
-  model         String
+  id        String  @id @default(cuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id])
+
+  brand          String
+  model          String
   specifications Json
+
   @@map("electronicsProduct")
 }
 
 // Category Model
 model Category {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  products      Product[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("categories")
 }
 
 // Order Models
 model Order {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   total         Float
-  status        OrderStatus
+  status        OrderStatus @default(PENDING)
   paymentMethod String
-  
-  orderItems    OrderItem[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("orders")
 }
 
 model OrderItem {
-  id            String    @id @default(cuid())
-  orderId       String
-  order         Order     @relation(fields: [orderId], references: [id])
-  
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id])
-  
-  quantity      Int
-  price         Float
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity Int
+  price    Float
 
   @@map("orderItems")
 }
 
 // Review Model
 model Review {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id])
-  
-  rating        Int
-  comment       String?
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("reviews")
 }
 
 // Follow Model
 model Follow {
-  id            String    @id @default(cuid())
-  customerId    String
-  customer      Customer  @relation(fields: [customerId], references: [id])
-  
-  vendorId      String
-  vendor        Vendor    @relation(fields: [vendorId], references: [id])
-  
-  createdAt     DateTime  @default(now())
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  createdAt DateTime @default(now())
+
   @@map("follows")
 }
 
 // Recent View Model
 model RecentView {
-  id            String    @id @default(cuid())
-  customerId    String
-  customer      Customer  @relation(fields: [customerId], references: [id])
-  
-  productId     String
-  createdAt     DateTime  @default(now())
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productId String
+  createdAt DateTime @default(now())
+
   @@map("recentViews")
 }
 
 // Login History Model
 model UserLoginHistory {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
-  loginAt       DateTime  @default(now())
-  ipAddress     String
-  deviceInfo    Json
-  location      String?
-  
-  isSuccessful  Boolean   @default(true)
-  loginType     LoginType
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  loginAt    DateTime @default(now())
+  ipAddress  String
+  deviceInfo Json
+  location   String?
+
+  isSuccessful Boolean   @default(true)
+  loginType    LoginType
 
   @@map("userLoginHistory")
 }
 
 // Suspension Record Model
 model SuspensionRecord {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
-  suspendedBy   String
-  reason        String
-  startDate     DateTime  @default(now())
-  endDate       DateTime?
-  isActive      Boolean   @default(true)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  suspendedBy String
+  reason      String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  isActive    Boolean   @default(true)
+
   @@map("suspensionRecords")
 }

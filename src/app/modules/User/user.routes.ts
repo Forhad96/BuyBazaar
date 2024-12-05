@@ -43,7 +43,7 @@ router.post(
   fileUploader.upload.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const parsedData = UserValidationSchemas.createCustomerSchema.parse(
+      const parsedData = UserValidationSchemas.createUserSchema.parse(
         JSON.parse(req.body.data)
       );
       req.body = parsedData;
@@ -61,4 +61,28 @@ router.post(
   userController.createVendor
 );
 
+//Change profile Status
+router.patch(
+  "/change-profile-status/:id",
+  auth(UserRole.SUPERADMIN, UserRole.ADMIN),
+  userController.changeProfileStatus
+);
+
+// update my profile
+router.patch(
+  "/update-my-profile",
+  auth(UserRole.SUPERADMIN,UserRole.ADMIN,UserRole.CUSTOMER,UserRole.VENDOR),
+  fileUploader.upload.single("file"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const parsedData = UserValidationSchemas.updateUserSchema.parse(
+        JSON.parse(req.body.data)
+      );
+      req.body = parsedData;
+      await userController.updateMyProfile(req, res, next);
+    } catch (error) {
+      next(error); // Passes validation errors to the error handler middleware
+    }
+  }
+);
 export const UserRoutes = router;
