@@ -78,7 +78,7 @@ model User {
   passwordHistory PasswordHistory[]
 
   // Security Fields
-  needsPasswordChange Boolean   @default(true)
+  needPasswordChange Boolean   @default(true)
   lastPasswordChange  DateTime  @default(now())
   passwordAttempts    Int       @default(0)
   isLocked            Boolean   @default(false)

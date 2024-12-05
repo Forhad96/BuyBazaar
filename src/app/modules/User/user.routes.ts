@@ -17,12 +17,13 @@ const parseFormData = (
   req.body = schema.parse(JSON.parse(req.body.data));
   next();
 };
-
+// get all user
 router.get(
   "/",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN),
   userController.getAllUser
 );
+// ge my profile
 router.get(
   "/me",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.VENDOR, UserRole.CUSTOMER),

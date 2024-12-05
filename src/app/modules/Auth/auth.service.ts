@@ -13,7 +13,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
   const isCorrectPassword = await bcrypt.compare(
@@ -41,6 +41,16 @@ const loginUser = async (payload: { email: string; password: string }) => {
     config.jwt.refresh_token_expires_in as string
   );
 
+  // update last login time
+  await prisma.user.update({
+    where: {
+      email: payload.email,
+    },
+    data: {
+      lastLogin: new Date(),
+    },
+  });
+
   return {
     accessToken,
     refreshToken,
@@ -61,7 +71,7 @@ const refreshToken = async (token: string) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: decoded.email,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
   const accessToken = jwtHelpers.generateToken(
@@ -83,7 +93,7 @@ const changePassword = async (user: any, payload: any) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: user.email,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -114,7 +124,7 @@ const forgotPassword = async (payload: { email: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
   const resetPassToken = jwtHelpers.generateToken(
@@ -155,7 +165,7 @@ const resetPassword = async (
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id: payload.id,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
 
