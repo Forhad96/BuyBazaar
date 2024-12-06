@@ -7,23 +7,48 @@ const getAllProducts = async (): Promise<Product[]> => {
 };
 
 const createProduct = async (productData: any) => {
-  const product = await prisma.product.upsert({
-    where: {
-      vendorId_categoryId_name: {
-        name: productData.name,
-        vendorId: productData.vendorId,
-        categoryId: productData.categoryId,
-      },
+  const {
+    name,
+    description,
+    price,
+    categoryId,
+    type,
+    inventory,
+    images,
+    discount,
+    vendorId,
+    clothingDetails,
+    electronicsDetails,
+  } = productData;
+  // console.log({electronicsDetails});
+  // return
+  const product = await prisma.product.create({
+    data: {
+      name,
+      description,
+      price,
+      categoryId,
+      type,
+      inventory,
+      images,
+      discount,
+      vendorId,
+      // Polymorphic relations
+      clothingDetails: clothingDetails
+        ? { create: clothingDetails }
+        : undefined,
+      electronicsDetails: electronicsDetails
+        ? { create: electronicsDetails }
+        : undefined,
     },
-    update: {
-      inventoryCount: {
-        increment: productData.inventoryCount,
-      },
+    include: {
+      clothingDetails: true,
+      electronicsDetails: true,
     },
-    create: productData,
   });
   return product;
 };
+
 export const ProductServices = {
   createProduct,
   getAllProducts,

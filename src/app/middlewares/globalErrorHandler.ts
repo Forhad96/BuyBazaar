@@ -7,6 +7,7 @@ import ApiError from "../errors/ApiError";
 import { config } from "../config";
 import handleZodError from "../errors/handleZodError";
 import handleDuplicateError from "../errors/handleDuplicateError";
+import handleForeignKeyError from "../errors/handleForeignKeyError";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let statusCode = 500;
@@ -26,6 +27,12 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     errorSources = simplifiedError?.errorSources;
   } else if (err?.code === "P2002") {
     const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err instanceof ApiError) {
+  } else if (err?.code === "P2003") {
+    const simplifiedError = handleForeignKeyError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;

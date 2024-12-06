@@ -75,7 +75,7 @@ model User {
   id              String            @id @default(cuid())
   email           String            @unique
   password        String
-  passwordHistory PasswordHistory[]
+
 
   // Security Fields
   needPasswordChange Boolean   @default(true)
@@ -116,7 +116,7 @@ model User {
   suspensionHistory SuspensionRecord[]
   Follow            Follow[]
   RecentView        RecentView[]
-
+  passwordHistory PasswordHistory[]
   @@map("users")
 }
 
@@ -153,44 +153,6 @@ model Vendor {
   @@map("vendors")
 }
 
-// Flash Sale Model
-model FlashSale {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-
-  startTime DateTime
-  endTime   DateTime
-
-  status FlashSaleStatus @default(SCHEDULED)
-
-  products FlashSaleProduct[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("flashSales")
-}
-
-// Flash Sale Product Relationship
-model FlashSaleProduct {
-  id          String    @id @default(cuid())
-  flashSaleId String
-  flashSale   FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
-
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  specialPrice       Float
-  discountPercentage Float
-  stockLimit         Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  //add @map name here
-  @@map("flashSaleProducts")
-}
 
 // Product Model
 model Product {
@@ -253,10 +215,51 @@ model ElectronicsProduct {
   @@map("electronicsProduct")
 }
 
+// Flash Sale Model
+model FlashSale {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  startTime DateTime
+  endTime   DateTime
+
+  status FlashSaleStatus @default(SCHEDULED)
+
+  products FlashSaleProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("flashSales")
+}
+
+// Flash Sale Product Relationship
+model FlashSaleProduct {
+  id          String    @id @default(cuid())
+  flashSaleId String
+  flashSale   FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  specialPrice       Float
+  discountPercentage Float
+  stockLimit         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //add @map name here
+  @@map("flashSaleProducts")
+}
+
+
 // Category Model
 model Category {
   id       String    @id @default(cuid())
   name     String    @unique
+  description String? 
   products Product[]
 
   createdAt DateTime @default(now())

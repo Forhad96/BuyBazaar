@@ -10,8 +10,8 @@ const router = Router();
 router.get("/", ProductControllers.getAllProducts);
 router.post(
   "/create-product",
-  auth(UserRole.Vendor),
-  validateRequest(ProductValidationSchemas.createProductSchema),
+  auth(UserRole.VENDOR),
+  validateRequest(ProductValidationSchemas.productSchema),
   ProductControllers.createProduct
 );
 

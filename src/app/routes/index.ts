@@ -3,7 +3,7 @@ import { UserRoutes } from "../modules/User/user.routes";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
 import { VendorRoutes } from "../modules/Vendor/vendor.routes";
 import { CategoryRoutes } from "../modules/Category/category.routes";
-import { ProductRoutes } from "../modules/product/product.routes";
+import { ProductRoutes } from "../modules/Product/product.routes";
 
 
 const router = express.Router();

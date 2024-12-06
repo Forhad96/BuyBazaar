@@ -53,6 +53,10 @@ const getAllVendors = async (params: any, options: IPaginationOptions) => {
         : {
             createdAt: "desc",
           },
+
+  include: {
+    user: true
+  }
   });
 
   const total = await prisma.vendor.count({
@@ -76,7 +80,7 @@ const createVendor = async (req: any) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
       id: body.ownerId,
-      status: UserStatus.Active,
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -99,7 +103,7 @@ const createVendor = async (req: any) => {
 
     await transactionClient.user.update({
       where: { id: userInfo.id },
-      data: { role: UserRole.Vendor },
+      data: { role: UserRole.VENDOR },
     });
 
     return vendor;
