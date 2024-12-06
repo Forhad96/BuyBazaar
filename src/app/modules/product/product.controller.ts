@@ -7,7 +7,8 @@ import httpStatus from "http-status";
 const getAllProducts = catchAsync(async (req, res) => {
     const filterData = pick(req.query, productFilterAbleFields);
     const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
-    const result = await ProductServices.getAllProducts();
+
+    const result = await ProductServices.getAllProducts(filterData,options);
     res.status(httpStatus.OK).json({
         success: true,
         message: "Products retrieved successfully",
@@ -15,7 +16,10 @@ const getAllProducts = catchAsync(async (req, res) => {
     });
 })
 const createProduct= catchAsync(async (req, res) => {
-    const result = await ProductServices.createProduct(req.body);
+    const files = (req.files as Express.Multer.File[]).map((file) => file.path);
+
+
+    const result = await ProductServices.createProduct(files,req.body);
     res.status(httpStatus.OK).json({
         success: true,
         message: "Product created successfully",

@@ -6,7 +6,7 @@ const createUserSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters long"), // Assuming a minimum length for passwords
   
   // Security Fields
-  needsPasswordChange: z.boolean().default(true),
+  needPasswordChange: z.boolean().default(true),
   lastPasswordChange: z.date().default(new Date()).optional(),
   passwordAttempts: z.number().int().nonnegative().default(0).optional(),
   isLocked: z.boolean().default(false).optional(),

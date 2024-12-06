@@ -8,8 +8,9 @@ import { IAuthUser } from "../../interfaces/common";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
+import { IUserFilterRequest } from "./user.interface";
 
-const getAllUser = async (params: any, options: IPaginationOptions) => {
+const getAllUser = async (params: IUserFilterRequest, options: IPaginationOptions) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   // console.log({searchTerm},{filterData});
@@ -81,12 +82,13 @@ const getMyProfile = async (user: IAuthUser) => {
 };
 
 const createCustomer = async (filePath: string, payload: User) => {
+
+
   let uploadedFile = null;
   if (filePath) {
     uploadedFile = await fileUploader.uploadToCloudinary(filePath);
     payload.profilePicture = uploadedFile?.secure_url || null;
   }
-  // (payload.password as string) && (await bcrypt.hash(payload.password, 12));
   payload.password =
     (payload.password as string) && (await bcrypt.hash(payload.password, 12));
 
@@ -94,13 +96,13 @@ const createCustomer = async (filePath: string, payload: User) => {
     data: payload,
   });
 
-  if (!result && uploadedFile) {
-    fileUploader.destroyOnCloudinary(uploadedFile.public_id);
-    throw new ApiError(
-      httpStatus.EXPECTATION_FAILED,
-      "Failed to create customer"
-    );
-  }
+  // if (!result && uploadedFile) {
+  //   fileUploader.destroyOnCloudinary(uploadedFile.public_id);
+  //   throw new ApiError(
+  //     httpStatus.EXPECTATION_FAILED,
+  //     "Failed to create customer"
+  //   );
+  // }
   return result;
 };
 

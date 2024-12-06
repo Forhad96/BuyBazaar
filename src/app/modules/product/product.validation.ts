@@ -11,7 +11,7 @@ const electronicsProductSchema = z.object({
 
 
 const productSchema = z.object({
-  body:z.object({
+
     vendorId: z.string(),
     categoryId: z.string(),
     name: z.string().min(1),
@@ -19,10 +19,9 @@ const productSchema = z.object({
     price: z.number(),
     type: z.nativeEnum(ProductType),
     inventory: z.number().int().nonnegative(),
-    images: z.array(z.string()),
+    images: z.array(z.string()).optional(),
     discount: z.number().optional(),
     electronicsDetails: electronicsProductSchema.optional(),
-  })
   });
 
 

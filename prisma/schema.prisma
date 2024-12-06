@@ -158,12 +158,12 @@ model Vendor {
 model Product {
   id       String @id @default(cuid())
   vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
 
-  name        String
+  name        String @unique
   description String
   price       Float
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id])
   categoryId  String
 
   type ProductType
