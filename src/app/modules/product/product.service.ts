@@ -111,7 +111,32 @@ if(filePaths.length > 0){
   return product;
 };
 
+const updateProduct = async (id: string, imagePaths: string[], productData: any) => {
+  const { name, description, price, categoryId, type, inventory, discount, clothingDetails, electronicsDetails } = productData;
+  const product = await prisma.product.update({
+    where: { id },
+    data: {
+      name,
+      description,
+      price,
+      categoryId,
+      type,
+      inventory,
+      discount,
+      images: imagePaths.length > 0 ? (await Promise.all(imagePaths.map((filePath) => fileUploader.uploadToCloudinary(filePath)))).map((file) => file.secure_url) : undefined,
+      electronicsDetails: electronicsDetails ? { update: electronicsDetails } : undefined,
+      clothingDetails: clothingDetails ? { update: clothingDetails } : undefined,
+    },
+    include: {
+      electronicsDetails: true,    
+      clothingDetails: true,
+    },
+  });
+  return product;
+}
+
 export const ProductServices = {
   createProduct,
   getAllProducts,
+  updateProduct,
 };

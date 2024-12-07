@@ -18,5 +18,12 @@ router.post(
   // validateRequest(),
   ProductControllers.createProduct
 );
+router.patch(
+  "/update-product/:id",
+  auth(UserRole.VENDOR),
+  fileUploader.upload.array("files"),
+  parseFormData(ProductValidationSchemas.updatedProductSchema),
+  ProductControllers.updateProduct
+);
 
 export const ProductRoutes = router;
