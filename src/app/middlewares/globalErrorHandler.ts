@@ -11,7 +11,7 @@ import handleForeignKeyError from "../errors/handleForeignKeyError";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let statusCode = 500;
-  console.log(err.code);
+  // console.log(err.code);
   let message = "something went wrong!";
   let errorSources: TErrorSources = [
     {
@@ -30,7 +30,6 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
-  } else if (err instanceof ApiError) {
   } else if (err?.code === "P2003") {
     const simplifiedError = handleForeignKeyError(err);
     statusCode = simplifiedError?.statusCode;

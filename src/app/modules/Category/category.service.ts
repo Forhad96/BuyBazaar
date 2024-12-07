@@ -7,7 +7,15 @@ const createCategory = async(payload: any) => {
 return result
 };
 
+const updateCategory =async (id: string, payload: any) => {
+    const result = await prisma.category.update({
+        where: {id},
+        data: payload
+    })
+    return result
+};
 
 export const CategoryServices = {
-    createCategory
+    createCategory,
+    updateCategory
 }
