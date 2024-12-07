@@ -192,7 +192,7 @@ model Product {
 model ClothingProduct {
   id        String  @id @default(cuid())
   productId String  @unique
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   size     String
   color    String
@@ -206,7 +206,7 @@ model ClothingProduct {
 model ElectronicsProduct {
   id        String  @id @default(cuid())
   productId String  @unique
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   brand          String
   model          String

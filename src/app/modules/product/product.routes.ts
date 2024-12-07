@@ -12,7 +12,7 @@ const router = Router();
 router.get("/", ProductControllers.getAllProducts);
 router.post(
   "/create-product",
-  auth(UserRole.VENDOR),
+  auth(UserRole.VENDOR,UserRole.ADMIN,UserRole.SUPERADMIN),
   fileUploader.upload.array("files"),
   parseFormData(ProductValidationSchemas.productSchema),
   // validateRequest(),
@@ -20,10 +20,15 @@ router.post(
 );
 router.patch(
   "/update-product/:id",
-  auth(UserRole.VENDOR),
+  auth(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN),
   fileUploader.upload.array("files"),
   parseFormData(ProductValidationSchemas.updatedProductSchema),
   ProductControllers.updateProduct
 );
 
+router.delete(
+  "/delete-product/:id",
+  auth(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN),
+  ProductControllers.deleteProduct
+)
 export const ProductRoutes = router;

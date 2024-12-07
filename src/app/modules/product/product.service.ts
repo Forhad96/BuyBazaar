@@ -135,8 +135,18 @@ const updateProduct = async (id: string, imagePaths: string[], productData: any)
   return product;
 }
 
+const deleteProduct = async (id: string) => {
+  await prisma.product.findUniqueOrThrow({
+    where: { id },  
+  })
+  const result = await prisma.product.delete({
+    where: { id },
+  });
+  return result;  
+}
 export const ProductServices = {
   createProduct,
   getAllProducts,
   updateProduct,
+  deleteProduct,
 };
