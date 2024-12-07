@@ -112,6 +112,18 @@ const createVendor = async (req: any) => {
   return result;
 };
 
+//Get Vendor products
+const getVendorProducts = async (vendorId: string) => {
+  const result = await prisma.product.findMany({
+    where: {
+      vendor: {
+        id: vendorId,
+      },
+    },
+  });
+  return result;
+}
+
 export const vendorService = {
   createVendor,
 

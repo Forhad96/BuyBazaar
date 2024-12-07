@@ -4,7 +4,9 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import { productSearchAbleFields } from "./product.constant";
 import { ProductResponse } from "./product.interface";
 import { fileUploader } from "../../../helpers/fileUploader";
-
+import { IAuthUser } from "../../interfaces/common";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
 //get all products for admin
 const getAllProducts = async (params: any, options: any): Promise<ProductResponse> => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
@@ -159,7 +161,7 @@ const createProduct = async (filePaths: string[], productData: any) => {
     type,
     inventory,
     discount,
-    vendorId,
+    vendorEmail,
     clothingDetails,
     electronicsDetails,
   } = productData;
@@ -180,7 +182,7 @@ if(filePaths.length > 0){
       inventory,
       images,
       discount,
-      vendorId,
+      vendorEmail,
       // Polymorphic relations
       clothingDetails: clothingDetails
         ? { create: clothingDetails }
@@ -222,15 +224,38 @@ const updateProduct = async (id: string, imagePaths: string[], productData: any)
   return product;
 }
 //delete product
-const deleteProduct = async (id: string) => {
-  await prisma.product.findUniqueOrThrow({
+// const deleteProduct = async (id: string) => {
+//   await prisma.product.findUniqueOrThrow({
+//     where: { id },  
+//   })
+//   const result = await prisma.product.delete({
+//     where: { id },
+//   });
+//   return result;  
+// };
+
+// Only admin and vendor can delete product, but admin can delete all vendor products, and vendor can only delete their own products.
+const deleteProduct = async (id: string, user: IAuthUser) => {
+  const product = await prisma.product.findUniqueOrThrow({
     where: { id },  
-  })
-  const result = await prisma.product.delete({
-    where: { id },
   });
-  return result;  
+  if (user?.role === UserRole?.SUPERADMIN || user?.role === UserRole?.ADMIN) {
+    await prisma.product.delete({
+      where: { id },
+    });
+  } else if (user?.role === UserRole?.VENDOR && product?.vendorEmail === user?.email) {
+    await prisma.product.delete({
+      where: { id },
+    });
+  } else {
+    throw new ApiError(httpStatus.UNAUTHORIZED,"You are not authorized to delete this product");
+  }
+return product
 }
+
+
+
+
 export const ProductServices = {
   createProduct,
   getAllProducts,

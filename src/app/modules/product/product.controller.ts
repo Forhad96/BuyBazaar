@@ -73,9 +73,10 @@ sendResponse(res, {
 })
 })
 
-const deleteProduct = catchAsync(async (req, res) => {
+const deleteProduct = catchAsync(async (req:Request & {user?: IAuthUser}, res:Response) => {
     const {id} = req.params
-    const result = await ProductServices.deleteProduct(id);
+    const user = req?.user as IAuthUser
+    const result = await ProductServices.deleteProduct(id,user);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

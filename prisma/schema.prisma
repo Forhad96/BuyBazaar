@@ -135,8 +135,8 @@ model PasswordHistory {
 // Vendor Model
 model Vendor {
   id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email String @unique
+  user   User   @relation(fields: [email], references: [email], onDelete: Cascade)
 
   shopName      String
   shopLogo      String?
@@ -157,9 +157,8 @@ model Vendor {
 // Product Model
 model Product {
   id       String @id @default(cuid())
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
+  vendorEmail String
+  vendor   Vendor @relation(fields: [vendorEmail], references: [email], onDelete: Cascade)
   name        String @unique
   description String
   price       Float

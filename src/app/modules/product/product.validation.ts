@@ -12,7 +12,7 @@ const electronicsProductSchema = z.object({
 
 const productSchema = z.object({
 
-    vendorId: z.string(),
+    vendorEmail: z.string(),
     categoryId: z.string(),
     name: z.string().min(1),
     description: z.string(),
