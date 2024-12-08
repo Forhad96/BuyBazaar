@@ -223,16 +223,7 @@ const updateProduct = async (id: string, imagePaths: string[], productData: any)
   });
   return product;
 }
-//delete product
-// const deleteProduct = async (id: string) => {
-//   await prisma.product.findUniqueOrThrow({
-//     where: { id },  
-//   })
-//   const result = await prisma.product.delete({
-//     where: { id },
-//   });
-//   return result;  
-// };
+
 
 // Only admin and vendor can delete product, but admin can delete all vendor products, and vendor can only delete their own products.
 const deleteProduct = async (id: string, user: IAuthUser) => {

@@ -2,6 +2,8 @@ import { NextFunction, Request, Response, Router } from "express";
 import { VendorController } from "./vendor.controller";
 import { VendorValidationSchemas } from "./vendor.validation";
 import { fileUploader } from "../../../helpers/fileUploader";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 
 const router = Router();
 

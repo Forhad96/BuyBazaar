@@ -41,6 +41,20 @@ enum ProductType {
   OTHERS
 }
 
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  DECLINED
+  EXPIRED_CARD
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CHARGEBACK_PENDING
+  CHARGEBACK_RESOLVED
+  VERIFIED
+  UNVERIFIED
+}
+
 enum FlashSaleStatus {
   SCHEDULED
   ACTIVE
@@ -72,17 +86,16 @@ model PasswordResetToken {
 
 // User Model
 model User {
-  id              String            @id @default(cuid())
-  email           String            @unique
-  password        String
-
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
 
   // Security Fields
   needPasswordChange Boolean   @default(true)
-  lastPasswordChange  DateTime  @default(now())
-  passwordAttempts    Int       @default(0)
-  isLocked            Boolean   @default(false)
-  lockoutEnd          DateTime?
+  lastPasswordChange DateTime  @default(now())
+  passwordAttempts   Int       @default(0)
+  isLocked           Boolean   @default(false)
+  lockoutEnd         DateTime?
 
   // Basic User Fields
   role           UserRole
@@ -114,9 +127,11 @@ model User {
   reviews           Review[]
   loginHistory      UserLoginHistory[]
   suspensionHistory SuspensionRecord[]
-  Follow            Follow[]
-  RecentView        RecentView[]
-  passwordHistory PasswordHistory[]
+  follow            Follow[]
+  recentView        RecentView[]
+  passwordHistory   PasswordHistory[]
+  cartItem          CartItem[]
+
   @@map("users")
 }
 
@@ -134,9 +149,9 @@ model PasswordHistory {
 
 // Vendor Model
 model Vendor {
-  id     String @id @default(cuid())
+  id    String @id @default(cuid())
   email String @unique
-  user   User   @relation(fields: [email], references: [email], onDelete: Cascade)
+  user  User   @relation(fields: [email], references: [email], onDelete: Cascade)
 
   shopName      String
   shopLogo      String?
@@ -153,13 +168,12 @@ model Vendor {
   @@map("vendors")
 }
 
-
 // Product Model
 model Product {
-  id       String @id @default(cuid())
+  id          String   @id @default(cuid())
   vendorEmail String
-  vendor   Vendor @relation(fields: [vendorEmail], references: [email], onDelete: Cascade)
-  name        String @unique
+  vendor      Vendor   @relation(fields: [vendorEmail], references: [email], onDelete: Cascade)
+  name        String   @unique
   description String
   price       Float
   category    Category @relation(fields: [categoryId], references: [id])
@@ -181,8 +195,9 @@ model Product {
   reviews    Review[]
   orderItems OrderItem[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  cartItem  CartItem[]
 
   @@map("products")
 }
@@ -253,13 +268,12 @@ model FlashSaleProduct {
   @@map("flashSaleProducts")
 }
 
-
 // Category Model
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  description String? 
-  products Product[]
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  products    Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -267,36 +281,74 @@ model Category {
   @@map("categories")
 }
 
+// Cart Model
+model CartItem {
+  // id            String   @id @default(cuid()) // Primary key
+  customerEmail String // Foreign key referencing User.email
+  productId     String // Foreign key referencing Product.id
+  quantity      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  //relations
+  user          User     @relation(fields: [customerEmail], references: [email])
+  product       Product  @relation(fields: [productId], references: [id])
+
+  @@id([customerEmail, productId])  // Composite primary key
+
+  @@map("cartItems")
+}
+
 // Order Models
 model Order {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
+  id            String      @id @default(cuid())
+  // Customer Fields
+  customerEmail String // Foreign key referencing User.email
+  user          User        @relation(fields: [customerEmail], references: [email])
+  // Order Fields
   total         Float
   status        OrderStatus @default(PENDING)
-  paymentMethod String
+  paymentMethod String?
 
-  orderItems OrderItem[]
-
+  // timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relationships
+  // orderItem      OrderItem[]
+  paymentHistory PaymentHistory[]
+  orderItem      OrderItem[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id      String @id @default(cuid())
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id])
+  id String @id @default(cuid())
 
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  productId String // Foreign key referencing Product.id
+  orderId   String // Foreign key referencing Order.id 
+
+  // relations
+  product Product @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
 
   quantity Int
   price    Float
 
+  // @@id([customerEmail, productId])
   @@map("orderItems")
+}
+
+model PaymentHistory {
+  id            String        @id @default(cuid())
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerEmail String
+  paymentMethod String
+  transactionId String?
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 // Review Model
