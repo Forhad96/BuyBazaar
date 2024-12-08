@@ -41,7 +41,7 @@ const updateProductQuantity = catchAsync(
     const user = req.user as IAuthUser;
     const productId = req.params.productId;
     const quantity = req.body.quantity;
-
+console.log(productId,quantity);
     const result = await CartServices.updateProductQuantity(user, productId, quantity);    
     sendResponse(res, {
       statusCode: httpStatus.OK,
