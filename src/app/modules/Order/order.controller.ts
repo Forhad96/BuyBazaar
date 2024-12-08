@@ -18,20 +18,7 @@ const createOrder = catchAsync(
   }
 );
 
-const addProductToCart = catchAsync(
-  async (req: Request & { user?: IAuthUser }, res: Response) => {
-    const user = req.user as IAuthUser;
 
-    const result = await OrderServices.addProductToCart(user, req.body);
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Product added to cart successfully",
-      data: result,
-    });
-  }
-);
 export const OrderControllers = {
   createOrder,
-  addProductToCart,
 };
