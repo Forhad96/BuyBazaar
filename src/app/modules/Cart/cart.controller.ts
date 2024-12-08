@@ -5,35 +5,49 @@ import { IAuthUser } from "../../interfaces/common";
 import { CartServices } from "./cart.service";
 import httpStatus from "http-status";
 
+//get my cart
+const getMyCart = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user as IAuthUser;
+    const result = await CartServices.getMyCart(user);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "My cart retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Add product to cart
 const addProductToCart = catchAsync(
-    async (req: Request & { user?: IAuthUser }, res: Response) => {
-      const user = req.user as IAuthUser;
-  
-      const result = await CartServices.addProductToCart(user, req.body);
-      sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Product added to cart successfully",
-        data: result,
-      });
-    }
-  );
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user as IAuthUser;
 
-  //remove product from cart
-  const removeProductFromCart = catchAsync(
-    async (req: Request & { user?: IAuthUser }, res: Response) => {
-      const user = req.user as IAuthUser;
-  const productId = req.params.productId
-      const result = await CartServices.removeProductFromCart(user, productId);
-      sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Product removed from cart successfully",
-        data: result,
-      });
-    }
-  )
+    const result = await CartServices.addProductToCart(user, req.body);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Product added to cart successfully",
+      data: result,
+    });
+  }
+);
+
+//remove product from cart
+const removeProductFromCart = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user as IAuthUser;
+    const productId = req.params.productId;
+    const result = await CartServices.removeProductFromCart(user, productId);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Product removed from cart successfully",
+      data: result,
+    });
+  }
+);
 
 //Update product quantity
 const updateProductQuantity = catchAsync(
@@ -41,20 +55,24 @@ const updateProductQuantity = catchAsync(
     const user = req.user as IAuthUser;
     const productId = req.params.productId;
     const quantity = req.body.quantity;
-console.log(productId,quantity);
-    const result = await CartServices.updateProductQuantity(user, productId, quantity);    
+    console.log(productId, quantity);
+    const result = await CartServices.updateProductQuantity(
+      user,
+      productId,
+      quantity
+    );
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: "Product quantity updated successfully",
-      data: result, 
-    })
+      data: result,
+    });
   }
-)
+);
 
-
-  export const CartController = {
-    addProductToCart,
-    removeProductFromCart,
-    updateProductQuantity
-  };
+export const CartControllers = {
+  getMyCart,
+  addProductToCart,
+  removeProductFromCart,
+  updateProductQuantity,
+};

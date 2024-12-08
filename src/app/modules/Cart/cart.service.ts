@@ -2,6 +2,20 @@ import { OrderItem } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 
+
+//get my cart
+const getMyCart = async (user: IAuthUser) => {
+    const result = await prisma.cartItem.findMany({
+        where: {
+            customerEmail: user?.email as string,
+        },
+        include: {
+            product: true,
+        },
+    });
+    return result;
+};
+
 // Add product to cart
 const addProductToCart = async (user: IAuthUser, payload: OrderItem) => {
   // If the product item is already in the cart, then just increase the quantity
@@ -44,6 +58,7 @@ const addProductToCart = async (user: IAuthUser, payload: OrderItem) => {
 
   return existingCartItem;
 };
+// Remove product from cart
 const removeProductFromCart = async (user: IAuthUser, productId: string) => {
   const result = await prisma.cartItem.deleteMany({
     where: {
@@ -54,7 +69,7 @@ const removeProductFromCart = async (user: IAuthUser, productId: string) => {
 
   return result;
 };
-
+// Update product quantity
 const updateProductQuantity = async (
   user: IAuthUser,
   productId: string,
@@ -83,6 +98,7 @@ const updateProductQuantity = async (
   return result;
 };
 export const CartServices = {
+    getMyCart,
   addProductToCart,
   removeProductFromCart,
   updateProductQuantity,
