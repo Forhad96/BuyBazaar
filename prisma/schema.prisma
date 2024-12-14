@@ -308,6 +308,7 @@ model Order {
   total         Float
   status        OrderStatus @default(PENDING)
   paymentMethod String?
+  shoppingAddress String
 
   // timestamps
   createdAt DateTime @default(now())

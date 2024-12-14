@@ -4,7 +4,7 @@ import { z } from "zod";
 const createUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Password must be at least 8 characters long"), // Assuming a minimum length for passwords
-  
+
   // Security Fields
   needPasswordChange: z.boolean().default(true),
   lastPasswordChange: z.date().default(new Date()).optional(),
@@ -25,6 +25,11 @@ const createUserSchema = z.object({
   zipCode: z.string().nullable().optional(),
   country: z.string().nullable().optional(),
 
+  // Additional Fields
+  shopName: z.string().optional(),
+  shopLogo: z.string().url().optional(),
+  description: z.string().optional(),
+
   // Account Management
   status: z.nativeEnum(UserStatus).default(UserStatus.ACTIVE),
 
@@ -32,8 +37,6 @@ const createUserSchema = z.object({
   createdAt: z.date().default(new Date()),
   updatedAt: z.date().optional(),
 });
-
-
 
 const VendorSchema = z.object({
   userId: z.string().uuid().optional(),
@@ -45,30 +48,28 @@ const VendorSchema = z.object({
   updatedAt: z.date().default(new Date()),
 });
 const createVendorSchema = z.object({
-  body:z.object({
+  body: z.object({
     name: z.string().min(1, "Name must be at least 3 characters long"),
     email: z.string().email(),
     password: z.string().min(8, "Password must be at least 8 characters long"),
     role: z.nativeEnum(UserRole).default(UserRole.VENDOR),
     shopName: z.string().min(3, "Shop name must be at least 3 characters long"),
-  })
-  })
+  }),
+});
 const createAdminSchema = z.object({
-  body:z.object({
+  body: z.object({
     name: z.string().min(1, "Name must be at least 3 characters long"),
     email: z.string().email(),
     password: z.string().min(8, "Password must be at least 8 characters long"),
     role: z.nativeEnum(UserRole).default(UserRole.ADMIN),
+  }),
+});
 
-  })
-  })
-
-  const updateUserSchema = createUserSchema.partial()
-  
+const updateUserSchema = createUserSchema.partial();
 
 export const UserValidationSchemas = {
   createUserSchema,
   updateUserSchema,
   createVendorSchema,
-  createAdminSchema
+  createAdminSchema,
 };

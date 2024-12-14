@@ -6,8 +6,6 @@ import pick from "../../../shared/pick";
 import { userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
-import { IFile } from "../../interfaces/file";
-
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
   const filterData = pick(req.query, userSearchAbleFields);
   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
@@ -55,6 +53,22 @@ const createCustomer = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const profilePicturePath = files.profilePicture
+    ? files.profilePicture[0].path
+    : null;
+  const shopLogoPath = files.shopLogo ? files.shopLogo[0].path : null;
+  // console.log({ profilePicturePath, shopLogoPath });
+  // console.log(req.body);
+  const result = await userServices.createUser( profilePicturePath,shopLogoPath,req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User created successfully",
+    data: result,
+  });
+});
 const createVendor = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createVendor(req.body);
   sendResponse(res, {
@@ -99,6 +113,7 @@ export const userController = {
   getAllUser,
   getMyProfile,
   createAdmin,
+  createUser,
   createCustomer,
   createVendor,
   changeProfileStatus,

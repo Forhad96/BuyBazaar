@@ -5,8 +5,9 @@ import { OrderControllers } from "./order.controller";
 
 const router = Router()
 
-
-router.post('/create-order',auth(UserRole.CUSTOMER), OrderControllers.createOrder)
+// get all orders
+router.get('/get-all-orders',auth(UserRole.ADMIN,UserRole.SUPERADMIN,UserRole.VENDOR,UserRole.CUSTOMER),OrderControllers.getAllOrders)
+router.post('/create-order',auth(UserRole.CUSTOMER),OrderControllers.createOrder)
 
 
 

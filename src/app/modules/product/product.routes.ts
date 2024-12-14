@@ -19,6 +19,7 @@ router.post(
   "/create-product",
   auth(UserRole.VENDOR,UserRole.ADMIN,UserRole.SUPERADMIN),
   fileUploader.upload.array("files"),
+  // fileUploader.upload.fields([{ name: "profilePicture", },{name:"shopLogo"}]),
   parseFormData(ProductValidationSchemas.productSchema),
   // validateRequest(),
   ProductControllers.createProduct

@@ -5,6 +5,7 @@ import { UserRole } from "@prisma/client";
 
 const router = Router()
 
+router.get('/',CategoryController.getAllCategories)
 
 router.post('/create-category', CategoryController.createCategory)
 

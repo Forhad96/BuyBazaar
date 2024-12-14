@@ -1,5 +1,5 @@
 {
-  "name": "ph-healthcare-server",
+  "name": "buybazaar-server",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -37,6 +37,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
+    "sslcommerz-lts": "^1.1.0",
     "ts-node-dev": "^2.0.0",
     "uuid": "^11.0.3",
     "zod": "^3.23.8"

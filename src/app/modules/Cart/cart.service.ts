@@ -16,6 +16,8 @@ const getMyCart = async (user: IAuthUser) => {
     return result;
 };
 
+
+
 // Add product to cart
 const addProductToCart = async (user: IAuthUser, payload: OrderItem) => {
   // If the product item is already in the cart, then just increase the quantity

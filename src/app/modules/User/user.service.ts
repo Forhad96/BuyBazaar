@@ -126,10 +126,74 @@ const createVendor = async (payload: any) => {
         },
       },
     },
+    include: {
+      vendor: true,
+      
+    }
   });
 
   return result;
 };
+
+
+
+
+
+
+const createUser = async (profilePicturePath: string | null, shopLogoPath: string | null, payload: any) => {
+  // Check if the role is valid
+  if (![UserRole.CUSTOMER, UserRole.VENDOR].includes(payload.role)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role");
+  }
+
+  // Handle file upload for profile picture if a file path is provided
+  let uploadedFile = null;
+  if (profilePicturePath) {
+    uploadedFile = await fileUploader.uploadToCloudinary(profilePicturePath);
+    payload.profilePicture = uploadedFile?.secure_url || null;
+  }
+
+  // Handle file upload for shop logo if a shop logo path is provided and the role is VENDOR
+  let uploadedShopLogo = null;
+  if (shopLogoPath && payload.role === UserRole.VENDOR) {
+    uploadedShopLogo = await fileUploader.uploadToCloudinary(shopLogoPath);
+  }
+
+  // Hash the password
+  payload.password =
+    (payload.password as string) && (await bcrypt.hash(payload.password, 12));
+
+  // Prepare the data object for Prisma
+  const data: any = {
+    name: payload.name,
+    email: payload.email,
+    role: payload.role,
+    password: payload.password,
+  };
+
+  // Add vendor-specific data if the role is VENDOR
+  if (payload.role === UserRole.VENDOR) {
+    data.vendor = {
+      create: {
+        shopName: payload.shopName,
+        shopLogo: uploadedShopLogo?.secure_url || null, // Add shop logo URL
+      },
+    };
+  }
+
+  // Create the user in the database
+  const result = await prisma.user.create({
+    data:data
+  });
+
+  // Return the result
+  return result;
+};
+
+
+
+
+
 
 const createAdmin = async (payload: any) => {
   if (payload.role !== UserRole.ADMIN) {
@@ -199,6 +263,7 @@ const updateMyProfile = async (
 };
 
 export const userServices = {
+  createUser,
   createCustomer,
   createVendor,
   createAdmin,

@@ -4,6 +4,19 @@ import sendResponse from "../../../shared/sendResponse";
 import { CategoryServices } from "./category.service";
 import httpStatus from "http-status";
 import { CLIENT_RENEG_LIMIT } from "tls";
+
+// get all categories
+const getAllCategories = catchAsync(async (req, res) => {
+  const result = await CategoryServices.getAllCategories();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Categories retrieved successfully",
+    data: result,
+  });
+})
+
+// create a new category
 const createCategory = catchAsync(async (req, res) => {
   const result = await CategoryServices.createCategory(req.body);
   sendResponse(res, {
@@ -14,6 +27,7 @@ const createCategory = catchAsync(async (req, res) => {
   });
 });
 
+// update a category
 const updateCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
 
@@ -25,7 +39,7 @@ const updateCategory = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+// delete a category
 const deleteCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await CategoryServices.deleteCategory(id); 
@@ -37,6 +51,7 @@ const deleteCategory = catchAsync(async (req, res) => {
   })
 })
 export const CategoryController = {
+  getAllCategories,
   createCategory,
   updateCategory,
   deleteCategory

@@ -51,10 +51,8 @@ const getProductById = catchAsync(async (req: Request & {user?: IAuthUser}, res:
 
 const createProduct= catchAsync(async (req, res) => {
     const files = (req.files as Express.Multer.File[]).map((file) => file.path);
-
-
     const result = await ProductServices.createProduct(files,req.body);
-    res.status(httpStatus.OK).json({
+    res.status(httpStatus.OK).json({ 
         success: true,
         message: "Product created successfully",
         data: result,

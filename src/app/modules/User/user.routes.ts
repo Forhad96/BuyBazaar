@@ -6,17 +6,10 @@ import { fileUploader } from "../../../helpers/fileUploader";
 import { z } from "zod";
 import { UserValidationSchemas } from "./user.validation";
 import validateRequest from "../../middlewares/validateRequest";
+import { parseFormData } from "../../../helpers/parseFormData";
 const router = Router();
 
-const parseFormData = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-  schema: z.ZodType
-) => {
-  req.body = schema.parse(JSON.parse(req.body.data));
-  next();
-};
+
 // get all user
 router.get(
   "/",
@@ -37,22 +30,21 @@ router.post(
   validateRequest(UserValidationSchemas.createAdminSchema),
   userController.createAdmin
 );
+import multer from 'multer';
+const upload = multer();
+//create  user
+router.post(
+  "/create-user",
+  upload.fields([{ name:"profilePicture",},{ name:"shopLogo"}]),
+  parseFormData(UserValidationSchemas.createUserSchema),
+  userController.createUser
+  
+)
 
 //create customer
 router.post(
   "/create-customer",
-  fileUploader.upload.single("file"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const parsedData = UserValidationSchemas.createUserSchema.parse(
-        JSON.parse(req.body.data)
-      );
-      req.body = parsedData;
-      await userController.createCustomer(req, res, next);
-    } catch (error) {
-      next(error); // Passes validation errors to the error handler middleware
-    }
-  }
+  fileUploader.upload.single("file"), parseFormData(UserValidationSchemas.createUserSchema),userController.createCustomer
 );
 
 //create vendor
