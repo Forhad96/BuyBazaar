@@ -6,27 +6,43 @@ import ApiError from "../errors/ApiError";
 import httpStatus from "http-status";
 
 const auth = (...roles: string[]) => {
-  return async (req: Request &{user?:any}, res: Response, next: NextFunction) => {
+  return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
       if (!token) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorize");
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Authorization token is missing");
       }
-      const verifiedUser = jwtHelpers.verifyToken(
-        token,
-        config.jwt.access_token_secret as Secret
-      );
-      // console.log(verifiedUser);
-      req.user = verifiedUser
+
+      let verifiedUser;
+      try {
+        verifiedUser = jwtHelpers.verifyToken(
+          token,
+          config.jwt.access_token_secret as Secret
+        );
+      } catch (error) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid authorization token");
+      }
+
+      if (!verifiedUser) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Token verification failed");
+      }
+
+      req.user = verifiedUser;
+
       if (roles.length && !roles.includes(verifiedUser.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");
+        throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to access this resource");
       }
-      next()
+
+      next();
     } catch (error) {
-      next(error);
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ message: error.message });
+      } else {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+      }
     }
-    //   console.log(verifiedUser);
   };
 };
 
 export default auth;
+

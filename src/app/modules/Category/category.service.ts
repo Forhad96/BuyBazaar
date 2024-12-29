@@ -8,7 +8,7 @@ const getAllCategories =async () => {
 
 // create a new category
 const createCategory = async(payload: any) => {
-    const result =await prisma.category.create({
+    const result =await prisma.category.createMany({
         data: payload
     })
 return result

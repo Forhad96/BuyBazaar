@@ -6,11 +6,12 @@ const pick = <T extends Record<string, unknown>, K extends keyof T>(
   const finalObj: Partial<T> = {};
   for (const key of keys) {
     if (obj && Object.hasOwnProperty.call(obj, key)) {
-      // console.log("pick",obj);
+      // console.log("pick",obj,key);
+      // console.log(key, obj[key]);
       finalObj[key] = obj[key];
     }
   }
-//   console.log(finalObj);
+    // console.log(finalObj);
   return finalObj;
 };
 

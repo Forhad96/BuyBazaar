@@ -7,18 +7,18 @@ import { UserRole } from "@prisma/client";
 
 const router = Router();
 
-router.get("/", auth(UserRole.ADMIN,UserRole.SUPER_ADMIN) ,AdminController.getAllFromDB);
+router.get("/", auth(UserRole.ADMIN,UserRole.SUPERADMIN) ,AdminController.getAllUsers);
 
-router.get("/:id",auth(UserRole.ADMIN,UserRole.SUPER_ADMIN), AdminController.getByIdFromDB);
+router.get("/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN), AdminController.getByIdFromDB);
 
 router.patch(
-  "/:id",auth(UserRole.ADMIN,UserRole.SUPER_ADMIN),
+  "/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN),
   validateRequest(adminValidationSchemas.zUpdateSchema),
   AdminController.updateIntoDB
 );
 
-router.delete("/:id",auth(UserRole.ADMIN,UserRole.SUPER_ADMIN), AdminController.deleteFromDB);
+router.delete("/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN), AdminController.deleteFromDB);
 
-router.delete("/soft/:id",auth(UserRole.ADMIN,UserRole.SUPER_ADMIN), AdminController.softDeleteFromDB);
+router.delete("/soft/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN), AdminController.softDeleteFromDB);
 
 export const AdminRoutes = router;

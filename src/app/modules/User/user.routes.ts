@@ -16,6 +16,14 @@ router.get(
   auth(UserRole.SUPERADMIN, UserRole.ADMIN),
   userController.getAllUser
 );
+
+//get user by id
+router.get(
+  "/:id",
+  auth(UserRole.SUPERADMIN, UserRole.ADMIN),
+  userController.getUserById
+);
+
 // ge my profile
 router.get(
   "/me",
@@ -78,4 +86,5 @@ router.patch(
     }
   }
 );
+
 export const UserRoutes = router;

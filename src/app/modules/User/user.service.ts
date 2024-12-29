@@ -9,24 +9,31 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
 import { IUserFilterRequest } from "./user.interface";
+import { object } from "zod";
 
-const getAllUser = async (params: IUserFilterRequest, options: IPaginationOptions) => {
+//get all users
+const getAllUser = async (
+  params: IUserFilterRequest,
+  options: IPaginationOptions
+) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   // console.log({searchTerm},{filterData});
-  const andConditions: Prisma.UserWhereInput[] = [];
 
+  const andConditions: Prisma.UserWhereInput[] = [];
   if (params.searchTerm) {
     andConditions.push({
       OR: userSearchAbleFields.map((field) => ({
         [field]: {
-          contains: searchTerm,
+          contains: params.searchTerm,
           mode: "insensitive",
         },
       })),
     });
   }
+  // console.dir(andConditions, { depth: null });
 
+  // return
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => ({
@@ -48,9 +55,14 @@ const getAllUser = async (params: IUserFilterRequest, options: IPaginationOption
     include: {
       vendor: true,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
   });
 
   const total = await prisma.user.count({
@@ -66,6 +78,22 @@ const getAllUser = async (params: IUserFilterRequest, options: IPaginationOption
     data: result,
   };
 };
+
+//get user by id
+const getUserById = async (userId: string) => {
+  const result = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      vendor: true,
+    },
+  });
+
+  return result;
+};
+
+//get my profile
 const getMyProfile = async (user: IAuthUser) => {
   if (user === null) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "User is null");
@@ -81,9 +109,8 @@ const getMyProfile = async (user: IAuthUser) => {
   return result;
 };
 
+//create customer
 const createCustomer = async (filePath: string, payload: User) => {
-
-
   let uploadedFile = null;
   if (filePath) {
     uploadedFile = await fileUploader.uploadToCloudinary(filePath);
@@ -106,6 +133,7 @@ const createCustomer = async (filePath: string, payload: User) => {
   return result;
 };
 
+//create vendor
 const createVendor = async (payload: any) => {
   if (payload.role !== UserRole.VENDOR) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Role must be VENDOR");
@@ -128,19 +156,18 @@ const createVendor = async (payload: any) => {
     },
     include: {
       vendor: true,
-      
-    }
+    },
   });
 
   return result;
 };
 
-
-
-
-
-
-const createUser = async (profilePicturePath: string | null, shopLogoPath: string | null, payload: any) => {
+//create user
+const createUser = async (
+  profilePicturePath: string | null,
+  shopLogoPath: string | null,
+  payload: any
+) => {
   // Check if the role is valid
   if (![UserRole.CUSTOMER, UserRole.VENDOR].includes(payload.role)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role");
@@ -183,18 +210,14 @@ const createUser = async (profilePicturePath: string | null, shopLogoPath: strin
 
   // Create the user in the database
   const result = await prisma.user.create({
-    data:data
+    data: data,
   });
 
   // Return the result
   return result;
 };
 
-
-
-
-
-
+//create admin
 const createAdmin = async (payload: any) => {
   if (payload.role !== UserRole.ADMIN) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Role must be ADMIN");
@@ -232,14 +255,12 @@ const changeProfileStatus = async (userId: string, status: UserStatus) => {
   return updateUserStatus;
 };
 
+//update my profile
 const updateMyProfile = async (
   user: IAuthUser,
   filePath: string,
   payload: any
 ) => {
-
-
-
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
       email: user?.email,
@@ -268,65 +289,8 @@ export const userServices = {
   createVendor,
   createAdmin,
   getAllUser,
+  getUserById,
   getMyProfile,
   changeProfileStatus,
   updateMyProfile,
 };
-
-// {
-//   type TPayload = {
-//     user: Prisma.UserCreateInput;
-//     vendor?: Prisma.VendorCreateInput;
-//     customer?: Prisma.CustomerCreateInput;
-//   };
-
-//   const registerUser = async (filePath: string, payload: TPayload) => {
-//     let profilePhotoUrl: string | null = null;
-//   console.log(payload);
-//     // Handle file upload if a file is provided
-//     if (filePath) {
-//       const uploadedFile = await fileUploader.uploadToCloudinary(filePath);
-//       profilePhotoUrl = uploadedFile?.secure_url || null;
-//       console.log(uploadedFile);
-//     }
-
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(payload?.user?.password, 12);
-
-//     let result = prisma.$transaction(async (transactionClient) => {
-//       // Save the user to the database
-//       if (payload && payload.user.role === UserRole.CUSTOMER) {
-//         const customer = await transactionClient.user.create({
-//           data: {
-//             name: payload.user.name,
-//             password: hashedPassword,
-//             profilePicture: profilePhotoUrl,
-//             email: payload.user.email,
-//             role: payload.user.role,
-//             customer: {
-//               create: {...payload.customer},
-//             },
-//           },
-//         });
-//         return customer;
-//       } else if (payload && payload.user.role === UserRole.VENDOR) {
-//         const vendor = await prisma.user.create({
-//           data: {
-//             password: hashedPassword,
-//             profilePicture: profilePhotoUrl,
-//             name: payload.user.name,
-//             email: payload.user.email,
-//             role: payload.user.role,
-//             customer: {
-//               create: {...payload.vendor},
-//             },
-//           },
-//         });
-//         return vendor;
-//       }
-//     });
-
-//     return result;
-//   };
-
-// }

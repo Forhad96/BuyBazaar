@@ -3,19 +3,32 @@ import { userServices } from "./user.service";
 import catchAsync from "../../../shared/catchAsync";
 import httpStatus from "http-status";
 import pick from "../../../shared/pick";
-import { userSearchAbleFields } from "./user.constant";
+import { userFilterableFields, userSearchAbleFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { IAuthUser } from "../../interfaces/common";
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
-  const filterData = pick(req.query, userSearchAbleFields);
+  const filterData = pick(req.query, userFilterableFields);
   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  // console.log(filterData);
   const result = await userServices.getAllUser(filterData, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Users retrieved successfully",
     meta: result.meta,
+    // data: result
     data: result.data,
+  });
+});
+
+const getUserById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await userServices.getUserById(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User retrieved successfully",
+    data: result,
   });
 });
 
@@ -109,8 +122,12 @@ const updateMyProfile = catchAsync(
     });
   }
 );
+
+
+
 export const userController = {
   getAllUser,
+  getUserById,
   getMyProfile,
   createAdmin,
   createUser,

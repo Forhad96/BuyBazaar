@@ -5,7 +5,7 @@ import { adminFilterAbleFields } from "./admin.constant";
 import sendResponse from "../../../shared/sendResponse";
 import catchAsync from "../../../shared/catchAsync";
 
-const getAllFromDB = catchAsync(async (req, res) => {
+const getAllUsers = catchAsync(async (req, res) => {
   const filterData = pick(req.query, adminFilterAbleFields);
   const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
   const result = await AdminServices.getAllFromDB(filterData, options);
@@ -63,7 +63,7 @@ const softDeleteFromDB = catchAsync(async (req, res) => {
 });
 
 export const AdminController = {
-  getAllFromDB,
+  getAllUsers,
   getByIdFromDB,
   updateIntoDB,
   deleteFromDB,

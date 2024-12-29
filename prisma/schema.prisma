@@ -271,7 +271,9 @@ model FlashSaleProduct {
 // Category Model
 model Category {
   id          String    @id @default(cuid())
-  name        String    @unique
+  name        String    
+  icon        String @default("No Icon")
+  slug String @unique
   description String?
   products    Product[]
 
@@ -293,21 +295,20 @@ model CartItem {
   user          User     @relation(fields: [customerEmail], references: [email])
   product       Product  @relation(fields: [productId], references: [id])
 
-  @@id([customerEmail, productId])  // Composite primary key
-
+  @@id([customerEmail, productId]) // Composite primary key
   @@map("cartItems")
 }
 
 // Order Models
 model Order {
-  id            String      @id @default(cuid())
+  id              String      @id @default(cuid())
   // Customer Fields
-  customerEmail String // Foreign key referencing User.email
-  user          User        @relation(fields: [customerEmail], references: [email])
+  customerEmail   String // Foreign key referencing User.email
+  user            User        @relation(fields: [customerEmail], references: [email])
   // Order Fields
-  total         Float
-  status        OrderStatus @default(PENDING)
-  paymentMethod String?
+  total           Float
+  status          OrderStatus @default(PENDING)
+  paymentMethod   String?
   shoppingAddress String
 
   // timestamps
