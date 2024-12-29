@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { userController } from "./user.controller";
+import { UserController } from "./user.controller";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import { fileUploader } from "../../../helpers/fileUploader";
@@ -14,21 +14,21 @@ const router = Router();
 router.get(
   "/",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN),
-  userController.getAllUser
+  UserController.getAllUser
 );
 
 //get user by id
 router.get(
   "/:id",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN),
-  userController.getUserById
+  UserController.getUserById
 );
 
 // ge my profile
 router.get(
   "/me",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.VENDOR, UserRole.CUSTOMER),
-  userController.getMyProfile
+  UserController.getMyProfile
 );
 
 // create admin
@@ -36,7 +36,7 @@ router.post(
   "/create-admin",
   auth(UserRole.SUPERADMIN),
   validateRequest(UserValidationSchemas.createAdminSchema),
-  userController.createAdmin
+  UserController.createAdmin
 );
 import multer from 'multer';
 const upload = multer();
@@ -45,28 +45,28 @@ router.post(
   "/create-user",
   upload.fields([{ name:"profilePicture",},{ name:"shopLogo"}]),
   parseFormData(UserValidationSchemas.createUserSchema),
-  userController.createUser
+  UserController.createUser
   
 )
 
 //create customer
 router.post(
   "/create-customer",
-  fileUploader.upload.single("file"), parseFormData(UserValidationSchemas.createUserSchema),userController.createCustomer
+  fileUploader.upload.single("file"), parseFormData(UserValidationSchemas.createUserSchema),UserController.createCustomer
 );
 
 //create vendor
 router.post(
   "/create-vendor",
   validateRequest(UserValidationSchemas.createVendorSchema),
-  userController.createVendor
+  UserController.createVendor
 );
 
 //Change profile Status
 router.patch(
   "/change-profile-status/:id",
   auth(UserRole.SUPERADMIN, UserRole.ADMIN),
-  userController.changeProfileStatus
+  UserController.changeProfileStatus
 );
 
 // update my profile
@@ -80,7 +80,7 @@ router.patch(
         JSON.parse(req.body.data)
       );
       req.body = parsedData;
-      await userController.updateMyProfile(req, res, next);
+      await UserController.updateMyProfile(req, res, next);
     } catch (error) {
       next(error); // Passes validation errors to the error handler middleware
     }

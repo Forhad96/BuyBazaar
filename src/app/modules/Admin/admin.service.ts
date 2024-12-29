@@ -4,21 +4,22 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { IAdminFilterRequest } from "./admin.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
+import { fileUploader } from "../../../helpers/fileUploader";
+import { IUserFilterRequest } from "../User/user.interface";
+import { userSearchAbleFields } from "../User/user.constant";
 
-const getAllFromDB = async (
-  params: IAdminFilterRequest,
+const getAllUsers = async (
+  params: IUserFilterRequest,
   options: IPaginationOptions
 ) => {
-  console.log(options);
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
+  // console.log({searchTerm},{filterData});
 
   const andConditions: Prisma.UserWhereInput[] = [];
-
-  //console.log(filterData);
   if (params.searchTerm) {
     andConditions.push({
-      OR: adminSearchAbleFields.map((field) => ({
+      OR: userSearchAbleFields.map((field) => ({
         [field]: {
           contains: params.searchTerm,
           mode: "insensitive",
@@ -26,7 +27,9 @@ const getAllFromDB = async (
       })),
     });
   }
+  // console.dir(andConditions, { depth: null });
 
+  // return
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => ({
@@ -37,17 +40,17 @@ const getAllFromDB = async (
     });
   }
 
-  // andConditions.push({
-  //   isDeleted: false,
-  // });
-
-  //console.dir(andConditions, { depth: 'infinity' })
-  const whereConditions: Prisma.UserWhereInput = { AND: andConditions };
+  const whereConditions: Prisma.UserWhereInput = {
+    AND: andConditions,
+  };
 
   const result = await prisma.user.findMany({
     where: whereConditions,
     skip,
     take: limit,
+    include: {
+      vendor: true,
+    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -71,75 +74,29 @@ const getAllFromDB = async (
     data: result,
   };
 };
-const getByIdFromDB = async (id: string) => {
-
-  const result = await prisma.admin.findUniqueOrThrow({
-    where: { id, isDeleted: false },
+const updateUser = async (id: string, filePath: string, payload: any) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
   });
-  return result;
-};
 
-const updateIntoDB = async (
-  id: string,
-  payload: Partial<Admin>
-): Promise<Admin> => {
-  await prisma.admin.findUniqueOrThrow({ where: { id, isDeleted: false } });
-  const result = await prisma.admin.update({
-    where: { id },
+  if (filePath) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(filePath);
+    payload.profilePhoto = uploadToCloudinary?.secure_url;
+  }
+
+  const profileInfo = await prisma.user.update({
+    where: {
+      id: userInfo.id,
+    },
     data: payload,
   });
 
-  return result;
-};
-
-const deleteFromDB = async (id: string): Promise<Admin | null> => {
-  await prisma.admin.findUniqueOrThrow({
-    where: { id },
-  });
-  const result = await prisma.$transaction(async (transactionClient) => {
-    const adminDeletedData = await transactionClient.admin.delete({
-      where: { id },
-    });
-
-    await transactionClient.user.delete({
-      where: {
-        email: adminDeletedData.email,
-      },
-    });
-    return adminDeletedData;
-  });
-
-  return result;
-};
-const softDeleteFromDB = async (id: string) => {
-  await prisma.admin.findUniqueOrThrow({
-    where: { id },
-  });
-  const result = await prisma.$transaction(async (transactionClient) => {
-    const adminDeletedData = await transactionClient.admin.update({
-      where: { id, isDeleted: false },
-      data: {
-        isDeleted: true,
-      },
-    });
-    await transactionClient.user.update({
-      where: {
-        email: adminDeletedData.email,
-      },
-      data: {
-        status: UserStatus.DELETED,
-      },
-    });
-    return adminDeletedData;
-  });
-
-  return result;
+  return profileInfo;
 };
 
 export const AdminServices = {
-  getAllFromDB,
-  getByIdFromDB,
-  updateIntoDB,
-  deleteFromDB,
-  softDeleteFromDB,
+  getAllUsers,
+  updateUser,
 };

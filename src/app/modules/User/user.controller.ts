@@ -125,7 +125,7 @@ const updateMyProfile = catchAsync(
 
 
 
-export const userController = {
+export const UserController = {
   getAllUser,
   getUserById,
   getMyProfile,
